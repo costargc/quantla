@@ -1,6 +1,8 @@
 var inquirer = require('inquirer');
 var fs = require('fs');
-
+const firebase = require("firebase");
+// Required for side-effects
+require("firebase/firestore");
 var Fundamentals = require("./checkFundamentals");
 var Prices = require("./checkPrices");
 var News = require("./checkNews");
@@ -9,6 +11,19 @@ require('./tools.js')();
 
 apikey = grabmykey();
 console.log('\033[2J');
+
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./quantla-firebase-adminsdk-o0jvh-e71456c4b6.json");
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://quantla.firebaseio.com"
+});
+
+let db = admin.firestore();
+
+
 
 inquirer
     .prompt([
@@ -20,38 +35,6 @@ inquirer
                 'Check News',
                 'Check Prices',
                 'Check Fundamentals'
-            ]
-        },
-        {
-            when: function (response) {
-                if (response.selection != 'Check Fundamentals')
-                    return true;
-            },
-            type: 'list',
-            name: 'company',
-            message: "What 'coin' do you need?",
-            choices: [
-                'BTC Bitcoin',
-                'LTC Litecoin',
-                'XRP Ripple',
-                'ETH Ethererum',
-                'XMR Monero',
-                'MAID MaidSafeCoin',
-                // 'BCH Bitcoin Cash',
-                // 'XEM NEM',
-            ],
-        },
-        {
-            when: function (response) {
-                if (response.selection == 'Check News')
-                    return true;
-            },
-            type: 'list',
-            name: 'runSentiment',
-            message: 'Run IBM Watson sentiment analysis?',
-            choices: [
-                'No',
-                'Yes'
             ]
         },
         {
@@ -94,7 +77,19 @@ inquirer
         switch (answers.selection) {
             case 'Check News':
                 var news = new News();
-                news.checkNews(answers.company, answers.runSentiment);
+
+                news.checkNews.then(function (result) {
+                    // "Stuff worked!", now process each article obj
+                    result.forEach(function (newsData) {
+                        db.collection('news').doc(newsData.date).set(newsData);
+                        console.log(newsData)
+                    }
+                    );
+                }, function (err) {
+                    console.log(err); // Error: "It broke"
+
+                });
+
                 break;
 
             case 'Check Prices':
@@ -110,6 +105,5 @@ inquirer
             default:
                 text = "I don't even know how you got here! That is definetly a bug...";
         }
-
     });
 //

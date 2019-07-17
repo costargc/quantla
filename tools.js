@@ -1,7 +1,22 @@
 var colors = require('colors');
+// < !--The core Firebase JS SDK is always required and must be listed first-- >
+var firebase = require('firebase');
+var app = firebase.initializeApp({
+    apiKey: "AIzaSyAxEVs3AUU-3VVhV_KPvedJl4SjCt-WVAI",
+    authDomain: "quantla.firebaseapp.com",
+    databaseURL: "https://quantla.firebaseio.com",
+    projectId: "quantla",
+    storageBucket: "quantla.appspot.com",
+    messagingSenderId: "702604873159",
+    appId: "1:702604873159:web:b738078256c761b5"
+});
+
 
 
 module.exports = function () {
+    this.initializeDB = function () {
+        return app;
+    }
     this.grabmykey = function () {
         p1 = "DZGEY11";
         p2 = "JGGNO1624";
