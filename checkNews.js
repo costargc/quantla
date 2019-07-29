@@ -47,6 +47,7 @@ var News = function () {
                         newsArr.push(newsArticle);
                         count++;
                         if (newsArr.length === 5) resolve(newsArr);
+                        if (newsArr.length === 0) reject("Error fetching news");
                     }
                 });
             };

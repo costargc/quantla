@@ -23,8 +23,6 @@ admin.initializeApp({
 
 let db = admin.firestore();
 
-
-
 inquirer
     .prompt([
         {
@@ -35,19 +33,6 @@ inquirer
                 'Check News',
                 'Check Prices',
                 'Check Fundamentals'
-            ]
-        },
-        {
-            when: function (response) {
-                if (response.selection == 'Check Prices')
-                    return true;
-            },
-            type: 'list',
-            name: 'runPrice',
-            message: 'Display trend analysis (buy and sell points)?',
-            choices: [
-                'No',
-                'Yes'
             ]
         },
         {
@@ -68,12 +53,6 @@ inquirer
     ])
     .then(answers => {
 
-
-        fs.appendFile("log.txt", "What do you want to do?: {" + answers.selection + "}\n", function (err) {
-            if (err) throw err;
-        })
-
-
         switch (answers.selection) {
             case 'Check News':
                 var news = new News();
@@ -82,9 +61,8 @@ inquirer
                     // "Stuff worked!", now process each article obj
                     result.forEach(function (newsData) {
                         db.collection('news').doc(newsData.date).set(newsData);
-                        console.log(newsData)
-                    }
-                    );
+                        console.log('Article Data has been added to the database')
+                    });
                 }, function (err) {
                     console.log(err); // Error: "It broke"
 
@@ -94,7 +72,22 @@ inquirer
 
             case 'Check Prices':
                 var prices = new Prices();
-                prices.checkPrices(answers.company, answers.runPrice);
+                prices.checkPrices.then(function (result) {
+                    console.log(result);
+
+                    var today = new Date();
+                    var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+                    var mins;
+                    if (today.getMinutes() < 10) mins = '0' + today.getMinutes();
+                    else mins = today.getMinutes();
+
+                    var time = today.getHours() + ":" + mins + ":" + today.getSeconds();
+                    var dateTime = date + ' ' + time;
+
+                    db.collection('prices').doc(dateTime).set(result);
+                    console.log('Prices Data has been added to the database');
+
+                });
                 break;
 
             case 'Check Fundamentals':
