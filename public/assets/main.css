@@ -10,7 +10,7 @@ body {
     width:100vw;
     font-family: 'Ubuntu Mono', monospace;
     color:#FFF;
-    height: 100vh;
+    overflow: hidden;
   }
 
 a{
