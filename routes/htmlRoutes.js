@@ -16,6 +16,14 @@ module.exports = function (app, path) {
     // });
   });
 
+  app.get("/terms", function (req, res) {
+    res.sendFile(path.join(__dirname, "../public", "tos.html"));
+  });
+
+  app.get("/home", function (req, res) {
+    res.sendFile(path.join(__dirname, "../public", "home.html"));
+  });
+
   // Load index page
   app.get("/core", function (req, res) {
     res.sendFile(path.join(__dirname, "../public", "core.html"));
@@ -27,21 +35,21 @@ module.exports = function (app, path) {
     // });
   });
 
-    // Load index page
-    app.get("/core/news", function (req, res) {
-      res.sendFile(path.join(__dirname, "../public", "news.html"));
-    });
+  // Load index page
+  app.get("/core/news", function (req, res) {
+    res.sendFile(path.join(__dirname, "../public", "news.html"));
+  });
 
-      // Load index page
+  // Load index page
   app.get("/core/prices", function (req, res) {
     res.sendFile(path.join(__dirname, "../public", "prices.html"));
   });
 
-    // Load index page
-    app.get("/core/fundamentals", function (req, res) {
-      res.sendFile(path.join(__dirname, "../public", "fundamentals.html"));
+  // Load index page
+  app.get("/core/fundamentals", function (req, res) {
+    res.sendFile(path.join(__dirname, "../public", "fundamentals.html"));
 
-    });
+  });
 
 
   // Load example page and pass in an example by id
@@ -56,6 +64,8 @@ module.exports = function (app, path) {
 
   // Render 404 page for any unmatched routes
   app.get("*", function (req, res) {
-    res.render("404");
+    var mypath = { pathname: res.req._parsedOriginalUrl.pathname };
+    res.status(404);
+    res.render("404", mypath);
   });
 };

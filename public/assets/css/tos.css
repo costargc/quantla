@@ -6,17 +6,46 @@ body {
   flex-wrap: wrap;
   padding: 0;
   margin: 0;
-  height: 100vh;
-  width: 100vw;
+  /* padding-top: 100px; */
+  padding-bottom: 100px;
+  /* height: 100vh; */
+  width: 100%;
   font-family: "Ubuntu Mono", monospace;
   color: #fff;
-  overflow: hidden;
+  /* overflow-x: hidden; */
 }
+
+.header-icon {
+  font-size: 60px;
+  color: #9acc14;
+  width: 68px;
+  float: left;
+  margin-top: 3px;
+  line-height: 0;
+}
+
+.header-title {
+  margin-left: 80px;
+}
+
+body::-webkit-scrollbar {
+  width: 1em;
+}
+
+body::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+
+body::-webkit-scrollbar-thumb {
+background-color: rgba(0, 0, 0, 0.637);
+outline: 1px solid slategrey;
+}
+
 
 html {
   height: 110%;
   margin-bottom: 0.01em;
-  overflow: initial !important;
+  overflow:initial !important;
 }
 
 a {
@@ -48,15 +77,6 @@ a:hover {
   border: 0;
 }
 
-button:focus {
-  outline: none;
-  color: #fff;
-  background-color: rgb(153, 203, 20, 0.5);
-  border-style: solid;
-  border-width: 1px;
-  border-color: #99cb14;
-}
-
 .form-control {
   padding: 6px 12px;
   font-size: 14px;
@@ -73,83 +93,40 @@ button:focus {
   color: #949ba2;
 }
 
-#codeForm p {
-  padding-top: 20px;
-  size: 0.5rem;
-  color: red;
-}
-
 /* Styling for firebaseUI widget */
 
-.mdl-card{
-  width: 100%;
-}
-
-#firebaseui-auth-container{
-  padding: 0;
-  margin: auto;
-  width: 100%;
-}
-
 .firebaseui-container {
-  display: flex;
-  flex-direction: column;
+  max-width: 380px !important;
+  width: 380px !important;
   background-color: rgba(148, 155, 168, 0.1);
-  position: relative;
-  top: 0;
-  width: 90%;
-  padding: 0px 0px 0px 0px;
-  margin: 20px 20px 20px 20px;
-  border: 0;
+  color: white !important;
+  padding: 20px 0;
 }
 
 .firebaseui-title {
-  color: white ;
+  color: white !important;
 }
 
 .firebaseui-link {
   color: #99cb14;
 }
 
-
-.mdl-button{
-  background: #00000000;
-  color: #99cb14;
-}
-
-.mdl-button:hover{
-  background: #00000000;
-  color: #99cb14;
-}
-
 .mdl-button--raised.mdl-button--colored {
   background: #99cb14;
-  color: white;
 }
 
 .mdl-button--raised.mdl-button--colored:hover {
-  background: #99cb14;
+  background: #baf519;
   color: white;
 }
 
-.mdl-button.mdl-button--colored{
-  background: #85af11;
-  color: white;
-}
-
-
-
-.firebaseui-label,
-.firebaseui-input {
+.firebaseui-label, .firebaseui-input {
   color: white;
 }
 
 .firebaseui-textfield.mdl-textfield .firebaseui-input {
   border-color: white;
-  font-size: 14px;
 }
-
-
 
 .firebaseui-textfield.mdl-textfield:focus .firebaseui-input {
   border-color: white;
@@ -162,27 +139,14 @@ button:focus {
 .firebaseui-text {
   color: rgba(255, 255, 255, 0.87);
   direction: ltr;
-  font-size: 13px;
+  font-size: 16px;
   line-height: 24px;
   text-align: left;
 }
 
-
 .firebaseui-textfield {
   color: rgba(255, 255, 255, 0.87);
   width: 100%;
-}
-
-/* mdl-card mdl-shadow--2dp firebaseui-container firebaseui-id-page-sign-in */
-
-.firebaseui-tos-list{
-  margin: 0;
-  padding: 0;
-  text-align: right;
-}
-
-.firebaseui-textfield-invalid{
-  color: greenyellow;
 }
 
 .firebaseui-tos {
@@ -192,22 +156,13 @@ button:focus {
   line-height: 16px;
   margin-bottom: 24px;
   margin-top: 0;
-  text-align: center;
+  text-align: left;
 }
 
-.mdl-textfield--floating-label.is-dirty .mdl-textfield__label,
-.mdl-textfield--floating-label.is-focused .mdl-textfield__label {
+.mdl-textfield--floating-label.is-dirty .mdl-textfield__label, .mdl-textfield--floating-label.is-focused .mdl-textfield__label {
   color: rgb(199, 199, 199);
 }
 
 .mdl-button--primary.mdl-button--primary {
-  color: #99cb14;
-}
-
-.mdl-button--primary.mdl-button--primary:hover {
-  color: #c0fd18;
-}
-
-.form-control:focus {
-  box-shadow: 0 0 0 0.2rem rgba(186, 245, 25, 0.25);
+  color:  #99cb14;
 }

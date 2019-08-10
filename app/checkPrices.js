@@ -1,120 +1,70 @@
-var fs = require('fs');
-var colors = require('colors');
+var colors = require("colors");
 var Promise = require("bluebird");
 var request = Promise.promisifyAll(require("request"), { multiArgs: true });
 
-var Prices = function () {
-    //This function checks the current prices for bitcoin and calculates the trend
-    //It grabs price data from the previous 6 hours and provides hourly trends
-    //Using this data, it calculates what prices we should buy, sell or hold at
+var Prices = function(datetime) {
+  //This function checks the current prices for bitcoin and calculates the trend
+  //It grabs price data from the previous 6 hours and provides 1 and 10 minute trends
+  //Using this data, it calculates what prices we should buy, sell or hold at
 
-    this.checkPrices = new Promise(function (resolve, reject) {
-        interval = '60min';
+  this.checkPrices = new Promise(function(resolve, reject) {
+    console.log(colors.inverse("Prices data"));
+    interval = "1min";
 
-        choicesobj = {
-            'BTC Bitcoin': 'BTCUSD',
-            'LTC Litecoin': 'LTCUSD',
-            'XRP Ripple': 'XRPUSD',
-            'ETH Ethererum': 'ETHUSD',
-            'XMR Monero': 'XMRUSD',
-            'MAID MaidSafeCoin': 'MAIDUSD',
-            'BCH Bitcoin Cash': 'BCHUSD',
-            'XEM NEM': 'XEMUSD',
-        };
+    //current time in UNIX epoch:
+    end = Math.floor(new Date() / 1000);
 
-        symbol = 'BTCUSD';
+    //10 minutes ago:
+    start = end - 600;
 
+    prevPriceQueryURL =
+      "https://poloniex.com/public?command=returnChartData&currencyPair=USDC_BTC&start=" +
+      start +
+      "&end=" +
+      end +
+      "&period=300";
 
-        queryURL = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=' + symbol + '&interval=' + interval + '&apikey=' + apikey;
-        // console.log(queryURL);
+    currPriceQueryURL =
+      "https://poloniex.com/public?command=returnOrderBook&currencyPair=USDC_BTC&depth=1";
 
-        request(queryURL, { json: true }, function (error, response, body) {
+    volQueryURL = " https://poloniex.com/public?command=return24hVolume";
 
-            keys = Object.keys(body['Time Series (60min)']);
-            // console.log(keys);
+    queryURLs = [currPriceQueryURL, volQueryURL, prevPriceQueryURL];
 
-            var findata = [];
-            for (i = 0; i < keys.length; i++) {
+    Promise.map(queryURLs, function(url) {
+      return request.getAsync(url).spread(function(response, body) {
+        return [JSON.parse(body), url];
+      });
+    }).then(function(results) {
+      var currentPriceAsks = parseFloat(results[0][0].asks[0][0]);
+      //console.log("current ask price", currentPriceAsks);
 
-                findata.push(body['Time Series (60min)'][keys[i]]['4. close']);
-            }
+      var currentPriceBids = parseFloat(results[0][0].bids[0][0]);
+      //console.log("current bid price", currentPriceBids);
 
-            var leveldata = [];
-            slevel_s = 0;
-            blevel_s = 0;
-            slevelcount = 0;
-            blevelcount = 0;
-            for (i = 0; i < findata.length - 6; i++) {
-                leveldata[i] = findata[i] / findata[i + 6] - 1;
-                if (leveldata[i] >= 0) {
-                    slevel_s = slevel_s + leveldata[i];
-                    slevelcount++;
-                }
-                else {
-                    blevel_s = blevel_s + leveldata[i];
-                    blevelcount++;
-                }
-            }
+      //console.log("24hr volume in USD: ", results[1][0]["USDC_BTC"]);
+      var currentVolume = parseFloat(results[1][0]["USDC_BTC"].USDC);
 
-            blevel = blevel_s / blevelcount;
-            slevel = slevel_s / slevelcount;
+      //Get the object that contains all the previous price data objects from the response body
+      //console.log("Previous price: ", results[2][0][0].close);
+      //get the price data from 10 minutes ago
+      var previousPriceClose = parseFloat(results[2][0][0].close);
+      //console.log("previous price (10 mins ago): ", previousPriceClose);
 
-            // levels and estimates can be improved in the future using Technical Indicators 
-            // https://www.fmlabs.com/reference/
+      var tenMinPriceVariation = currentPriceAsks / previousPriceClose - 1;
 
-            function checktrend() {
-                if (Math.abs(blevel) > Math.abs(slevel)) {
-                    return "DOWN"
-                }
-                else return "UP"
-            }
-
-
-
-            console.log(colors.inverse(symbol + " trading strategy"));
-            console.log(colors.yellow("   " + "Current Price:    " + findata[0]));
-            console.log(colors.yellow("   " + "Buy If Price:     " + Math.round(findata[0] * (1 + blevel) * 10000, 0) / 10000));
-            console.log(colors.yellow("   " + "Sell If Price:    " + Math.round(findata[0] * (1 + slevel) * 10000, 0) / 10000));
-            console.log(colors.yellow("   " + "Max time to hold: " + "6h"));
-            console.log(colors.yellow("   " + "Trend:            " + checktrend()));
-            console.log("\n");
-
-
-
-
-            console.log(colors.inverse(symbol + " most recent prices"));
-            var recentPrices = [];
-            for (j = 0; j < 5; j++) {
-
-                if (Math.round((findata[j] * 1 / findata[j + 1] * 1 - 1) * 10000, 0) / 100 >= 0) {
-                    console.log("   " + keys[j] + "   " + findata[j] + "    " + colors.green("+" + Math.round((findata[j] * 1 / findata[j + 1] * 1 - 1) * 10000, 0) / 100 + "%"));
-                }
-                else {
-                    console.log("   " + keys[j] + "   " + findata[j] + "    " + colors.red(Math.round((findata[j] * 1 / findata[j + 1] * 1 - 1) * 10000, 0) / 100 + "%"));
-                }
-
-                var pricesObj = {
-                    date: keys[j],
-                    price: findata[j],
-                    trend: Math.round((findata[j] * 1 / findata[j + 1] * 1 - 1) * 10000, 0) / 100
-
-                };
-                recentPrices.push(pricesObj);
-
-            }
-            var priceData = {
-                recentPrices: recentPrices,
-                currentPrice: findata[0],
-                buyIfPrice: Math.round(findata[0] * (1 + blevel) * 10000, 0) / 10000,
-                sellIfPrice: Math.round(findata[0] * (1 + slevel) * 10000, 0) / 10000,
-                trend: checktrend()
-            }
-            resolve(priceData);
-
-
-
-        });
+      // Construct the object to be returned by the function
+      var priceData = {
+        dateCreated: datetime,
+        currentPriceAsks: currentPriceAsks,
+        currentPriceBids: currentPriceBids,
+        previousPrice: previousPriceClose,
+        tenMinPriceVariation: tenMinPriceVariation,
+        currentVolume: currentVolume
+      };
+      resolve(priceData);
     });
-}
+  });
+};
 
 module.exports = Prices;

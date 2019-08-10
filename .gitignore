@@ -1,5 +1,3 @@
 /node_modules
-
-/public/assets/js/firebase_config.js
-
 .env
+ibm-credentials.env

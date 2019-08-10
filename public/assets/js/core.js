@@ -1,61 +1,102 @@
-$(document).ready(function () {
-
-
-    var myList = [
-        {
-            "time": "1",
-            "news title": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-            "link": "google.com",
-            "score-link": 0.5
-        },
-        { "time": "2", "news title": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "link": "google.com", "score-link": 1.2 },
-        { "time": "3", "news title": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC CCCCCCCCC", "link": "google.com", "score-link": -0.75 }
-    ];
-
-    // Builds the HTML Table out of myList.
-    selector = "#NewsTable";
-    buildHtmlTable(selector);
-
-    function buildHtmlTable(selector) {
-        var columns = addAllColumnHeaders(myList, selector);
-
-        var group$ = $('<tbody/>');
-        for (var i = 0; i < myList.length; i++) {
-            var row$ = $('<tr/>');
-            for (var colIndex = 0; colIndex < columns.length; colIndex++) {
-                var cellValue = myList[i][columns[colIndex]];
-                if (cellValue == null) cellValue = "";
-                newtd$ = $('<td/>');
-                $(group$).append(row$.append(newtd$.html(cellValue)));
-                $(newtd$).attr('id', 'row' + i + ',col' + colIndex);
-            }
-            $(selector).append(group$);
-        }
-
-    }
-
-    // Adds a header row to the table and returns the set of columns.
-    // Need to do union of keys from all records as some records may not contain
-    // all records.
-    function addAllColumnHeaders(myList, selector) {
-        var columnSet = [];
-        var group$ = $('<thead/>');
-        var headerTr$ = $('<tr/>');
-
-        for (var i = 0; i < myList.length; i++) {
-            var rowHash = myList[i];
-            for (var key in rowHash) {
-                if ($.inArray(key, columnSet) == -1) {
-                    columnSet.push(key);
-                    $(group$).append(headerTr$.append($('<th/>').html(key)));
-                }
-            }
-        }
-        $(selector).append(group$);
-
-        return columnSet;
-    }
-
-    // $('#NewsTable').DataTable();
-
+var userID;
+//Get the user id of the current user
+firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+    userID = user.uid;
+    console.log("User id: " + userID);
+    console.log("User email: " + user.email);
+    //buildShoppingList();
+  } else {
+    console.log("no one is signed in");
+    (self.location.href = "invite.html"), event.preventDefault();
+  }
 });
+
+grabproposedtradedata();
+
+setInterval(function() {
+  grabproposedtradedata();
+  console.log("test");
+}, 30000);
+
+function grabproposedtradedata() {
+  $.getJSON(
+    "https://poloniex.com/public?command=returnOrderBook&currencyPair=USDC_BTC&depth=1",
+    function(results) {
+      // console.log(results.asks[0][0]);
+
+      $("#curr_price").text(
+        (Math.round(results.asks[0][0] * 100) / 100)
+          .toFixed(2)
+          .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+      );
+    }
+  );
+  var currDatetime = { time: Math.floor(new Date() / 1000) };
+  $.post("api/decisions", currDatetime, function(data) {
+    console.log("front end decisions: ", data);
+    $("#bif_price").text(
+      (Math.round(data[data.length - 1].buyIfPrice * 100) / 100)
+        .toFixed(2)
+        .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+    );
+    $("#sif_price").text(
+      (Math.round(data[data.length - 1].sellIfPrice * 100) / 100)
+        .toFixed(2)
+        .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+    );
+
+    $("#indication").text(data[data.length - 1].aiDecision);
+
+    if (data[data.length - 1].aiDecision == "Buy") {
+      $("#indication_img").attr("class", "fas fa-arrow-circle-up");
+      $("#indication_img").css("color", "greenyellow");
+      $("#indication").css("color", "greenyellow");
+    } else if (data[data.length - 1].aiDecision == "Sell") {
+      $("#indication_img").attr("class", "fas fa-arrow-circle-down");
+      $("#indication_img").css("color", "red");
+      $("#indication").css("color", "red");
+    } else {
+      $("#indication_img").attr("class", "fas fa-exchange-alt");
+      $("#indication_img").css("color", "yellow");
+      $("#indication").css("color", "yellow");
+    }
+  });
+
+  // $.getJSON("./assets/AIDecision.json", function(data) {
+  //   // console.log(fileData[fileData.length - 1]);
+  //   // console.log(fileData[fileData.length - 1].CurrentPrice);
+  //   // console.log(fileData[fileData.length - 1].AIDecision);
+
+  //   // $('#curr_price').text(
+  //   //   (Math.round(fileData[fileData.length - 1].CurrentPrice * 100) / 100).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')
+  //   // );
+
+  //   $("#bif_price").text(
+  //     (Math.round(fileData[fileData.length - 1].BuyIfPrice * 100) / 100)
+  //       .toFixed(2)
+  //       .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+  //   );
+  //   $("#sif_price").text(
+  //     (Math.round(fileData[fileData.length - 1].SellIfPrice * 100) / 100)
+  //       .toFixed(2)
+  //       .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+  //   );
+
+  //   $("#indication").text(fileData[fileData.length - 1].AIDecision);
+
+  //   if (fileData[fileData.length - 1].AIDecision == "Buy") {
+  //     $("#indication_img").attr("class", "fas fa-arrow-circle-up");
+  //     $("#indication_img").css("color", "greenyellow");
+  //     $("#indication").css("color", "greenyellow");
+  //   } else if (fileData[fileData.length - 1].AIDecision == "Sell") {
+  //     $("#indication_img").attr("class", "fas fa-arrow-circle-down");
+  //     $("#indication_img").css("color", "red");
+  //     $("#indication").css("color", "red");
+  //   } else {
+  //     $("#indication_img").attr("class", "fas fa-exchange-alt");
+  //     $("#indication_img").css("color", "yellow");
+  //     $("#indication").css("color", "yellow");
+  //   }
+  // });
+}
