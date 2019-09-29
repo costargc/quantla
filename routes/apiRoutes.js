@@ -2,11 +2,19 @@ var db = require("../models");
 const Op = db.Sequelize.Op;
 require("../controller/controller.js")();
 
+const keyPublishable = process.env.PUBLISHABLE_KEY;
+const keySecret = process.env.SECRET_KEY;
+
+// Set your secret key: remember to change this to your live secret key in production
+// See your keys here: https://dashboard.stripe.com/account/apikeys
+const stripe = require("stripe")(keySecret);
+const bodyParser = require("body-parser");
+
 module.exports = function(app) {
   // Get news articles
-  app.post("/api/news", function(req, res) {
+  app.get("/api/news", function(req, res) {
     console.log(req.body.time);
-    var datetime = req.body.time;
+    var datetime = Math.floor(new Date() / 1000);
     var hourprevious = datetime - 3600;
     db.News.findAll({
       attributes: ["dateCreated", "btcScore", "bitcoinScore", "documentScore"],
@@ -27,8 +35,8 @@ module.exports = function(app) {
     });
   });
 
-  app.post("/api/prices", function(req, res) {
-    var datetime = req.body.time;
+  app.get("/api/prices", function(req, res) {
+    var datetime = Math.floor(new Date() / 1000);
     var hourprevious = datetime - 3600;
     db.Prices.findAll({
       attributes: [
@@ -58,8 +66,8 @@ module.exports = function(app) {
     });
   });
 
-  app.post("/api/fundamentals", function(req, res) {
-    var datetime = req.body.time;
+  app.get("/api/fundamentals", function(req, res) {
+    var datetime = Math.floor(new Date() / 1000);
     var hourprevious = datetime - 3600;
     db.Fundamentals.findAll({
       attributes: [
@@ -88,8 +96,8 @@ module.exports = function(app) {
     });
   });
 
-  app.post("/api/decisions", function(req, res) {
-    var datetime = req.body.time;
+  app.get("/api/decisions", function(req, res) {
+    var datetime = Math.floor(new Date() / 1000);
     var hourprevious = datetime - 3600;
     db.Decisions.findAll({
       attributes: [

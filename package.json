@@ -10,8 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "concurrently \"npm:quantla-server\" \"npm:quantla-core\" \"npm:quantla-tensorflow\"",
     "quantla-server": "node quantla-server.js",
-    "quantla-core": "node quantla.js",
-    "quantla-tensorflow": "node tensorflow.js"
+    "quantla-core": "node quantla-core.js",
+    "quantla-tensorflow": "node quantla-tensorflow.js"
   },
   "repository": {
     "type": "git",
@@ -42,6 +42,7 @@
     "path": "^0.12.7",
     "request": "^2.88.0",
     "sequelize": "^5.12.2",
+    "stripe": "^7.8.0",
     "utf8": "^3.0.0",
     "xml-js": "^1.6.11"
   }

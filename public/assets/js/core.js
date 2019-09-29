@@ -1,4 +1,7 @@
 var userID;
+
+firebase.initializeApp(firebaseConfig);
+
 //Get the user id of the current user
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
@@ -33,7 +36,7 @@ function grabproposedtradedata() {
     }
   );
   var currDatetime = { time: Math.floor(new Date() / 1000) };
-  $.post("api/decisions", currDatetime, function(data) {
+  $.get("api/decisions", function(data) {
     console.log("front end decisions: ", data);
     $("#bif_price").text(
       (Math.round(data[data.length - 1].buyIfPrice * 100) / 100)
@@ -61,6 +64,20 @@ function grabproposedtradedata() {
       $("#indication_img").css("color", "yellow");
       $("#indication").css("color", "yellow");
     }
+  });
+
+  $(document).ready(function() {
+    // click handler for logout
+    $("#logout").on("click", function(event) {
+      event.preventDefault();
+      firebase
+        .auth()
+        .signOut()
+        .then(() => {
+          console.log("user signed out");
+        });
+      (self.location.href = "invite.html"), event.preventDefault();
+    });
   });
 
   // $.getJSON("./assets/AIDecision.json", function(data) {
